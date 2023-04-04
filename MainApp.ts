@@ -3,6 +3,7 @@ import cookieSession from "cookie-session";
 import { ErrorHandler, HttpCode } from "./Utils/ErrorHandler";
 import { errorDevHandlers } from "./Utils/DevError";
 import user from "./Routes/userRoutes";
+import auths from "./Routes/auth.route";
 export const MainApp = (app: Application) => {
 	//calling all our middlewares
 	app
@@ -39,6 +40,7 @@ export const MainApp = (app: Application) => {
 		})
 
 		.use("/api", user)
+		.use("/api/auth", auths)
 
 		.all("*", (req: Request, res: Response, next: NextFunction) => {
 			next(
