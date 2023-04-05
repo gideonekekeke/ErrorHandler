@@ -21,11 +21,10 @@ export const SignUpValid = [
 		.withMessage("password must contain a number"),
 ];
 
-export const LoginValid = () => {
+export const LoginValid = [
 	check("email", "email is required")
 		.isEmail()
-		.isEmpty()
-		.withMessage("Must be a valid email address");
+		.withMessage("Must be a valid email address"),
 
 	check("password", "password is required")
 		.notEmpty()
@@ -34,8 +33,8 @@ export const LoginValid = () => {
 		})
 		.withMessage("passowrd must have at least 6 characters")
 		.matches(/\d/)
-		.withMessage("password must contain a number");
-};
+		.withMessage("password must contain a number"),
+];
 
 export const ForgotPasswordValid = () => {
 	check("email")

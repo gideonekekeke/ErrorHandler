@@ -5,13 +5,13 @@
 		<title>Verify your account</title>
 	</head>
 	<body>
-		<p>Hi <%= username %>,</p>
+		<h2>Hi <%= name %>,</h2>
 		<p>
 			Thank you for signing up for our service. To activate your account, please
 			click the button below:
 		</p>
 		<a
-			href="<%= verificationLink %>"
+			href="<%= url %>/api/auth/verify/<%= token %>"
 			style="
 				background-color: #3498db;
 				border: none;

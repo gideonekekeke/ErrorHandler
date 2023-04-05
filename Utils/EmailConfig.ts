@@ -1,5 +1,7 @@
 import nodemailer from "nodemailer";
 import { google } from "googleapis";
+import path from "path";
+import ejs from "ejs";
 
 const GOOGLE_SECRET = "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";
 
@@ -13,9 +15,15 @@ const GOOGLE_REFRESHTOKEN =
 
 const oAuth = new google.auth.OAuth2(GOOGLE_ID, GOOGLE_SECRET, GOOGLE_REDIRECT);
 
+const url = "http://localhost:1400";
+
 oAuth.setCredentials({ refresh_token: GOOGLE_REFRESHTOKEN });
 
-export const sendMailToUsers = async (user: any) => {
+export const AccountVerification = async (
+	token: any,
+	email: any,
+	name: any,
+) => {
 	try {
 		const accessToken = await oAuth.getAccessToken();
 
@@ -31,11 +39,19 @@ export const sendMailToUsers = async (user: any) => {
 			},
 		});
 
+		const buildFile = path.join(__dirname, "../views/AccountVerification.ejs");
+
+		const data = await ejs.renderFile(buildFile, {
+			token: token,
+			name: name,
+			url: url,
+		});
+
 		const mailOptions = {
 			from: "Annonymous<shotkode123@gmail.com>",
-			to: user?.email,
-			subject: "Configure",
-			html: `<h2> Welcome to my Test api  </h2>`,
+			to: email,
+			subject: "Account Verification",
+			html: data,
 		};
 
 		transporter.sendMail(mailOptions);
