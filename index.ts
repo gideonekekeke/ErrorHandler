@@ -2,7 +2,10 @@ import express, { Application } from "express";
 import { MainApp } from "./MainApp";
 const port = 1400;
 import "./Utils/db";
+
 const app: Application = express();
+import passport from "passport";
+import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 
 const server = app.listen(port, () => {
 	console.log("listening on port " + port);

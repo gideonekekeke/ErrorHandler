@@ -1,5 +1,6 @@
 import {
 	forgotPass,
+	GoogleLogin,
 	loginUser,
 	registerUser,
 	resetPassword,
@@ -20,5 +21,6 @@ router.get("/verify/:tokenID", verifyActivationAccount);
 router.post("/login", LoginValid, loginUser);
 router.post("/forgotPass", ForgotPasswordValid, forgotPass);
 router.post("/resetPass", ResetPasswordValid, resetPassword);
+router.post("/googleLogin", GoogleLogin);
 
 export default router;

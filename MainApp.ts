@@ -4,10 +4,16 @@ import { ErrorHandler, HttpCode } from "./Utils/ErrorHandler";
 import { errorDevHandlers } from "./Utils/DevError";
 import user from "./Routes/userRoutes";
 import auths from "./Routes/auth.route";
+import social from "./Routes/social.route";
+import "./Controller/social.controller";
+
+import cors from "cors";
+import passport from "passport";
 export const MainApp = (app: Application) => {
 	//calling all our middlewares
 	app
 		.use(express.json())
+		.use(cors())
 
 		.use(
 			cookieSession({
@@ -41,6 +47,9 @@ export const MainApp = (app: Application) => {
 
 		.use("/api", user)
 		.use("/api/auth", auths)
+		.use("/", social)
+		.use(passport.initialize())
+		.use(passport.session())
 
 		.all("*", (req: Request, res: Response, next: NextFunction) => {
 			next(

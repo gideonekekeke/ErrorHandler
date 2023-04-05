@@ -3,12 +3,23 @@ import { check, validationResult } from "express-validator";
 import { Request, Response } from "express";
 import { ErrorHandler, HttpCode } from "../Utils/ErrorHandler";
 import jwt from "jsonwebtoken";
+import { OAuth2Client } from "google-auth-library";
 
 import {
 	AccountVerification,
 	ForgotPasswordVerification,
 } from "../Utils/EmailConfig";
 import bcrypt from "bcrypt";
+
+const GOOGLE_SECRET = "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";
+
+const GOOGLE_ID =
+	"526763411906-dab729ct9f2tsuqpmb6uv30t7kp9a584.apps.googleusercontent.com";
+
+const GOOGLE_REDIRECT = "https://developers.google.com/oauthplayground";
+
+const GOOGLE_REFRESHTOKEN =
+	"1//04Y5AsDKQNfTvCgYIARAAGAQSNwF-L9IrlXB3BZV31aPR2nzemx4DkcLXimEb9aD4eIngPXPQ_gW2-Rt8N3LdFNGA-gkmDKTc0Sc";
 
 export const registerUser = async (req: Request, res: Response) => {
 	try {
@@ -249,6 +260,33 @@ export const resetPassword = async (req: Request, res: Response) => {
 				}
 			}
 		}
+	} catch (err) {
+		return new ErrorHandler({
+			name: "forgot password error",
+			message: "an error occured why  reseting your password",
+			httpCode: HttpCode.NOT_FOUND,
+			isOperational: false,
+		});
+	}
+};
+
+const client = new OAuth2Client(
+	"429547593894-eoslv48mp6o2rbpv0lhu8kv2vb8s6dik.apps.googleusercontent.com",
+);
+
+export const GoogleLogin = async (req: Request, res: Response) => {
+	try {
+		const { idToken } = req.body;
+
+		client
+			.verifyIdToken({
+				idToken,
+				audience:
+					"429547593894-eoslv48mp6o2rbpv0lhu8kv2vb8s6dik.apps.googleusercontent.com",
+			})
+			.then((response) => {
+				res.json(response);
+			});
 	} catch (err) {
 		return new ErrorHandler({
 			name: "forgot password error",
