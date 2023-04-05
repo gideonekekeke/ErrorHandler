@@ -36,16 +36,16 @@ export const LoginValid = [
 		.withMessage("password must contain a number"),
 ];
 
-export const ForgotPasswordValid = () => {
+export const ForgotPasswordValid = [
 	check("email")
 		.not()
 		.isEmpty()
 		.isEmail()
-		.withMessage("Must be a valid email address");
-};
+		.withMessage("Must be a valid email address"),
+];
 
-export const ResetPasswordValid = () => {
-	check("newPassword")
+export const ResetPasswordValid = [
+	check("newPassword", "new password is required")
 		.not()
 		.isEmpty()
 		.isLength({
@@ -53,5 +53,5 @@ export const ResetPasswordValid = () => {
 		})
 		.withMessage("passowrd must have at least 6 characters")
 		.matches(/\d/)
-		.withMessage("password must contain a number");
-};
+		.withMessage("password must contain a number"),
+];

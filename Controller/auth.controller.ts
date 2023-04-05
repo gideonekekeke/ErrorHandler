@@ -4,7 +4,10 @@ import { Request, Response } from "express";
 import { ErrorHandler, HttpCode } from "../Utils/ErrorHandler";
 import jwt from "jsonwebtoken";
 
-import { AccountVerification } from "../Utils/EmailConfig";
+import {
+	AccountVerification,
+	ForgotPasswordVerification,
+} from "../Utils/EmailConfig";
 import bcrypt from "bcrypt";
 
 export const registerUser = async (req: Request, res: Response) => {
@@ -121,7 +124,7 @@ export const loginUser = async (req: Request, res: Response) => {
 			});
 		} else {
 			const user: any = await UserModel.findOne({ email: email }).exec();
-			console.log("i ran");
+			// console.log("i ran");
 			const checkPassword = await bcrypt.compare(password, user?.password!);
 
 			if (!checkPassword) {
@@ -152,6 +155,104 @@ export const loginUser = async (req: Request, res: Response) => {
 		return new ErrorHandler({
 			name: "login error",
 			message: "cannot login user due to an issue",
+			httpCode: HttpCode.NOT_FOUND,
+			isOperational: false,
+		});
+	}
+};
+
+export const forgotPass = async (req: Request, res: Response) => {
+	try {
+		const { email } = req.body;
+
+		const errors = validationResult(req);
+		if (!errors.isEmpty()) {
+			const errorMessage = errors.array().map((props) => props.msg)[0];
+
+			return res.status(HttpCode.NOT_FOUND).json({
+				message: errorMessage,
+			});
+		} else {
+			const user = await UserModel.findOne({ email });
+
+			if (!user) {
+				return res.status(HttpCode.BAD_REQUEST).json({
+					message: "user with this email does not exists",
+				});
+			} else {
+				const token = jwt.sign(
+					{
+						_id: user._id,
+					},
+					"xsfjgnzjf-snsdjrbh-sfghhhzk463q74t4-fxgnsdfhsdfjj",
+					{
+						expiresIn: "10m",
+					},
+				);
+
+				await user.updateOne({
+					resetPasswordLink: token,
+				});
+
+				ForgotPasswordVerification(token, email, user?.name)
+					.then(() => {
+						res.status(HttpCode.OK).json({
+							message: "check your email to complete this operation",
+						});
+					})
+					.catch((err) => {
+						return res.status(HttpCode.BAD_REQUEST).json({
+							message: err,
+						});
+					});
+			}
+		}
+	} catch (err) {
+		return new ErrorHandler({
+			name: "forgot password error",
+			message: "an error occured why  reseting your password",
+			httpCode: HttpCode.NOT_FOUND,
+			isOperational: false,
+		});
+	}
+};
+
+export const resetPassword = async (req: Request, res: Response) => {
+	try {
+		const { resetPasswordLink, newPassword } = req.body;
+
+		const salt = await bcrypt.genSalt(10);
+		const hash = await bcrypt.hash(newPassword, salt);
+
+		const errors = validationResult(req);
+		if (!errors.isEmpty()) {
+			const errorMessage = errors.array().map((props) => props.msg)[0];
+			return res.status(HttpCode.NOT_FOUND).json({
+				message: errorMessage,
+			});
+		} else {
+			if (resetPasswordLink) {
+				const user = await UserModel.findOne({ resetPasswordLink });
+				if (user) {
+					await user.updateOne({
+						password: hash,
+						resetPasswordLink: "",
+					});
+
+					return res.status(HttpCode.OK).json({
+						message: "successfull",
+					});
+				} else {
+					return res.status(HttpCode.NOT_FOUND).json({
+						message: "dont have permission for this",
+					});
+				}
+			}
+		}
+	} catch (err) {
+		return new ErrorHandler({
+			name: "forgot password error",
+			message: "an error occured why  reseting your password",
 			httpCode: HttpCode.NOT_FOUND,
 			isOperational: false,
 		});

@@ -5,7 +5,9 @@ interface IData {
 	email: string;
 }
 
-interface mainData extends IData, mongoose.Document {}
+interface mainData extends IData, mongoose.Document {
+	resetPasswordLink: string;
+}
 
 const userSchema = new mongoose.Schema(
 	{
@@ -23,6 +25,10 @@ const userSchema = new mongoose.Schema(
 			type: String,
 			required: true,
 			trim: true,
+		},
+
+		resetPasswordLink: {
+			type: String,
 		},
 	},
 	{ timestamps: true },
