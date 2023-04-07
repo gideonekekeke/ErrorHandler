@@ -2,6 +2,7 @@ import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import UserModel from "../Model/UserModel";
 import jwt from "jsonwebtoken";
+import { Strategy as GitHubStrategy } from "passport-github2";
 
 passport.use(
 	new GoogleStrategy(
@@ -48,6 +49,53 @@ passport.use(
 	),
 );
 
+passport.use(
+	new GitHubStrategy(
+		{
+			clientID: "67ab69f96d413b96af64",
+			clientSecret: "47e6bb9beceae58cfc2f9224f3292e926fbf6932",
+			callbackURL: "/auth/github/callback",
+			scope: ["user:email"],
+		},
+		async (accessToken, refreshToken, profile, done) => {
+			try {
+				const email = (profile?.emails?.[0]?.value || "").toLowerCase();
+
+				if (!email) {
+					throw new Error("User email is not available.");
+				}
+
+				const user = await UserModel.findOne({ email });
+
+				if (user) {
+					const token = jwt.sign(
+						{ _id: user._id },
+						"xsfjgnzjf-snsdjrbh-sfghhhzk463q74t4-fxgnsdfhsdfjj",
+						{ expiresIn: "7d" },
+					);
+					return done(null, token);
+				}
+
+				const newUser = await UserModel.create({
+					name: profile?.displayName,
+					email,
+					password: email,
+				});
+
+				const token = jwt.sign(
+					{ _id: newUser._id },
+					"xsfjgnzjf-snsdjrbh-sfghhhzk463q74t4-fxgnsdfhsdfjj",
+					{ expiresIn: "7d" },
+				);
+
+				return done(null, token);
+			} catch (error) {
+				return done(error);
+			}
+		},
+	),
+);
+
 passport.serializeUser((user, done) => {
 	done(null, user);
 });
@@ -55,28 +103,3 @@ passport.serializeUser((user, done) => {
 passport.deserializeUser((user: any, done) => {
 	done(null, user);
 });
-
-export const handleGoogleAuthCallback = async (req, res) => {
-	try {
-		passport.authenticate("google", async (err, data) => {
-			if (err) {
-				return res.status(500).json({
-					message: "An error occurred while authenticating with Google.",
-				});
-			}
-
-			// Get the user and token from the authentication result
-			const { user, token } = data;
-
-			// Store the token in localStorage
-
-			// res.json(token);
-
-			// Redirect the user to the dashboard
-			res.redirect(`http://127.0.0.1:5173/?token=${token}`);
-		})(req, res);
-	} catch (err) {
-		console.error(err);
-		res.status(500).json({ message: "Internal server error" });
-	}
-};

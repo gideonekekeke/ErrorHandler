@@ -15,7 +15,7 @@ const GOOGLE_REFRESHTOKEN =
 
 const oAuth = new google.auth.OAuth2(GOOGLE_ID, GOOGLE_SECRET, GOOGLE_REDIRECT);
 
-const url = "http://localhost:1400";
+const url = "http://127.0.0.1:5173";
 const frontEndUrl = "http://localhost:3000";
 
 oAuth.setCredentials({ refresh_token: GOOGLE_REFRESHTOKEN });
